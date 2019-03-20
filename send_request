@@ -1,0 +1,29 @@
+import itchat  #使用itchat库获取微信好友列表的json格式
+from threading import Timer #设置定时脚本
+import request #通过request库,在网站上获取到自己需要的信息
+bot =None
+def login_wechat():
+    global bot #声明变量bot，是全局变量
+    bot = Bot() #不需要每次触发条件的时候，都要扫码一次二维码
+def getNews():
+    url = "http://open.iciba.com/dsapi"   #需要抓取数据页面的URL
+    res = request.get(url).json()  #获取页面数据返回json格式
+    content = res['content']  #获取json中content的信息
+    translation = res['translation']  #获取json中translation的信息
+    return content,translation
+def send_New():
+    if bot == None:
+        login_wechat()
+    try:
+        content = getNews()
+        my_friend = bot.friends().search(u'XXXX')[0] #XXXX代表的是微信好友的名称
+        my_friend.send(content[0])   #send是发送信息
+        my_friend.send(content[1][5:])
+        my_friend.send(u'测试自动发送')
+        t = Timer(86400,send_New) #Timer定时器，86400代表一天
+        t.start()
+    except:
+        my_friend = bot.friends().search(u'xxxx')[0] #xxxxx自己微信的名称 
+        my_friend.send(u'今天消息发送失败了')
+if __name__ =='__main__':   #执行程序
+    send_New()
